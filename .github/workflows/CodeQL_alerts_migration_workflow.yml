@@ -53,12 +53,12 @@ jobs:
           path: sarif_reports/
 
       - name: Authenticate with GitHub CLI for target repository
-        env:
-          GH_TOKEN: ${{ secrets.TARGET_TOKEN }}
         run: |
           sudo apt-get update
           sudo apt-get install gh
-          gh auth login --with-token ${{ secrets.TARGET_TOKEN }}
+          #gh auth login --with-token ${{ secrets.TARGET_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.TARGET_TOKEN }}
 
       - name: Upload SARIF files to target repository
         env:
