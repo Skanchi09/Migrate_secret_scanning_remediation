@@ -56,7 +56,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.TARGET_TOKEN }}
         run: |
-          echo "${GH_TOKEN}" | gh auth login --with-token
+          sudo apt-get update
+          sudo apt-get install gh
+          gh auth login --with-token ${{ secrets.TARGET_TOKEN }}
 
       - name: Upload SARIF files to target repository
         env:
