@@ -5,8 +5,37 @@ on:
     types: [opened, edited]
 
 jobs:
-  migrate:
+  extract_migration_level:
     runs-on: ubuntu-latest
+    outputs:
+      migration_level: ${{ steps.extract.outputs.migration_level }}
+    steps:
+      - name: Get Migration Level from Issue Body
+        id: extract
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueBody = context.payload.issue.body;
+            const migrationLevelMatch = issueBody.match(/### Migration Level\s*\n*(.*)/);
+            const migrationLevel = migrationLevelMatch ? migrationLevelMatch[1].trim() : "Repository"; // default to Repository
+            console.log("Migration Level: ", migrationLevel);
+            core.setOutput("migration_level", migrationLevel);
+      - name: Validate PAT tokens
+        run: |
+          if [[ -z "${{ secrets.SOURCE_TOKEN }}" ]]; then
+            echo "Source Token is missing!"
+            exit 1
+          fi
+          if [[ -z "${{ secrets.TARGET_TOKEN }}" ]]; then
+          echo "Target Token is missing!"
+          exit 1
+          fi
+        shell: bash
+        
+  Repo-level-migration:
+    runs-on: ubuntu-latest
+    needs: extract_migration_level
+    if: ${{ needs.extract_migration_level.outputs.migration_level == 'Repository' }}  # Check migration level output
 
     steps:
     - name: Checkout the repository
